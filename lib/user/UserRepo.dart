@@ -31,6 +31,12 @@ class UserRepo {
   }
 
   updateUser(User newUser) async {
-    await reference.document(newUser.uid).updateData(newUser.toJson());
+    print("-----------------------------------URL{" +
+        newUser.imageUrl.toString() +
+        "}-------------------\n uid:{$newUser.uid}");
+    await Firestore.instance
+        .collection('user')
+        .document(newUser.uid)
+        .updateData(newUser.toJson());
   }
 }

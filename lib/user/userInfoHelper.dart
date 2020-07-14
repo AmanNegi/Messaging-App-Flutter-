@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_clipboard_manager/flutter_clipboard_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:messaging_app_new/Layout/infoDialog.dart';
 import 'package:messaging_app_new/user/user.dart';
 import '../consts/theme.dart';
 
@@ -47,14 +48,19 @@ class _UserInfoHelperState extends State<UserInfoHelper> {
           elevation: 0,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          color: mainColor.withOpacity(0.3),
+          color: AppTheme.mainColor.withOpacity(0.3),
           child: Stack(
             children: <Widget>[
               Align(
                 alignment: Alignment.topRight,
                 child: IconButton(
                   icon: Icon(Icons.info),
-                  onPressed: () {},
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (context) => InfoDialog());
+                  },
                 ),
               ),
               Positioned(
@@ -82,7 +88,8 @@ class _UserInfoHelperState extends State<UserInfoHelper> {
                   padding: const EdgeInsets.all(8.0),
                   child: SelectableText(
                     user.uid,
-                    style: GoogleFonts.raleway(fontSize: 25),
+                    style: TextStyle(
+                        fontSize: 25, fontFamily: AppTheme.fontFamily),
                   ),
                 ),
               ),
@@ -98,7 +105,7 @@ class _UserInfoHelperState extends State<UserInfoHelper> {
       padding: const EdgeInsets.all(8.0),
       child: Container(
         decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(15.0),
             boxShadow: [
               BoxShadow(
@@ -135,7 +142,7 @@ class _UserInfoHelperState extends State<UserInfoHelper> {
         Align(
           alignment: Alignment.topCenter,
           child: Container(
-            color: mainColor.withOpacity(0.3),
+            color: AppTheme.mainColor.withOpacity(0.3),
             height: 0.22 * height,
           ),
         ),

@@ -1,22 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_clipboard_manager/flutter_clipboard_manager.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:messaging_app_new/message/messageRepo.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../message/message.dart';
 import '../consts/theme.dart';
 
-class MessageDetail extends StatelessWidget {
+class ReceivedMessageDetail extends StatelessWidget {
   Message message;
   var documentId;
   var width, height;
 
-  MessageDetail({this.message, @required this.documentId});
+  ReceivedMessageDetail({this.message, @required this.documentId});
   @override
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width;
     height = MediaQuery.of(context).size.height;
     return Scaffold(
+      floatingActionButton: message.type == 0
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                FlutterClipboardManager.copyToClipBoard(message.message);
+                Fluttertoast.showToast(
+                  msg: 'Copied "${message.message}" to clipboard',
+                );
+              },
+              label: Row(
+                children: <Widget>[
+                  Icon(MdiIcons.clipboardFileOutline),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text("Copy Text"),
+                ],
+              ),
+            )
+          : null,
       appBar: AppBar(
         backgroundColor: Theme.of(context).canvasColor,
         elevation: 0,
@@ -33,14 +55,7 @@ class MessageDetail extends StatelessWidget {
       body: Column(
         children: <Widget>[
           _buildMainWidget(context),
-          Divider(),
-          _buildColorContainer(AppTheme.isSeen.withOpacity(0.9), "Seen color",
-              AppTheme.buttonTextColor),
-          _buildColorContainer(
-              Theme.of(context).cardColor, "Unseen color", AppTheme.textColor),
-          Divider(),
-          Spacer(),
-          _showOrNotShowDeleteMessage(context),
+          Container(),
         ],
       ),
     );
@@ -52,56 +67,6 @@ class MessageDetail extends StatelessWidget {
     } else {
       return _buildImageWidget(context);
     }
-  }
-
-  _showOrNotShowDeleteMessage(context) {
-    if (message.message != "This message has been deleted") {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 4.0),
-        child: ButtonTheme(
-          minWidth: 0.9 * width,
-          height: 0.075 * height,
-          child: FlatButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0)),
-            color: AppTheme.accentColor,
-            onPressed: () {
-              if (message.type == 0) {
-                messageRepo.deleteMessage(message);
-                Navigator.of(context).pop();
-              } else {
-                messageRepo.deleteImage(documentId, message);
-                Navigator.of(context).pop();
-              }
-            },
-            child: Text(
-              "Delete message?",
-              style: TextStyle(
-                  color: AppTheme.buttonTextColor, fontWeight: FontWeight.w800),
-            ),
-          ),
-        ),
-      );
-    }
-    return Container();
-  }
-
-  _buildColorContainer(Color color, String text, Color textColor) {
-    return Container(
-      height: 50,
-      width: width,
-      decoration: BoxDecoration(color: color),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 20.0),
-          child: Text(
-            text,
-            style: TextStyle(color: textColor),
-          ),
-        ),
-      ),
-    );
   }
 
   _buildImageWidget(context) {
@@ -125,9 +90,7 @@ class MessageDetail extends StatelessWidget {
                   right: 10.0,
                   bottom: 5.0,
                 ),
-                color: message.isSeen
-                    ? AppTheme.isSeen.withOpacity(0.7)
-                    : Theme.of(context).cardColor,
+                color: Theme.of(context).cardColor,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
@@ -183,11 +146,9 @@ class MessageDetail extends StatelessWidget {
             decoration: BoxDecoration(boxShadow: [
               BoxShadow(
                   blurRadius: 5.0,
-                  color: message.isSeen
-                      ? AppTheme.isSeen.withOpacity(0.05)
-                      : AppTheme.notSeen.withOpacity(0.05),
-                  offset: Offset(0.0, 2.0),
-                  spreadRadius: 1.0)
+                  color: AppTheme.notSeen.withOpacity(0.1),
+                  offset: Offset(0.0, 5.0),
+                  spreadRadius: 2.0)
             ]),
             child: Padding(
               padding: const EdgeInsets.all(5.0),
@@ -202,9 +163,7 @@ class MessageDetail extends StatelessWidget {
                     Container(
                       constraints: BoxConstraints(maxWidth: width * 0.7),
                       decoration: BoxDecoration(
-                        color: message.isSeen
-                            ? AppTheme.isSeen.withOpacity(0.7)
-                            : Theme.of(context).cardColor,
+                        color: Theme.of(context).cardColor,
                       ),
                       padding: EdgeInsets.only(
                         top: 15.0,

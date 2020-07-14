@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:messaging_app_new/user/user.dart';
+import 'package:rxdart/rxdart.dart';
 import './data/sharedPrefs.dart';
 
 class MainRepo {
   var reference = Firestore.instance.collection("message");
   DocumentReference documentReference;
-
 //* TODO: Get all users the current user is messaging with
 
   Stream<QuerySnapshot> getStream() {
@@ -18,10 +18,11 @@ class MainRepo {
           "participants",
           arrayContains: uid,
         )
+        .orderBy('date', descending: true)
         .snapshots();
   }
 
-  getUserStream(String uid) {
+  Stream getUserStream(String uid) {
     return Firestore.instance.collection('user').document(uid).snapshots();
   }
 

@@ -1,14 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class GroupModel {
   List participants;
+  DateTime date;
+  //last message date
 
-  GroupModel({@required this.participants});
+  GroupModel({@required this.participants, @required this.date});
 
   factory GroupModel.fromJson(Map json) {
-    return GroupModel(participants: json['participants'] as List);
+    return GroupModel(
+        participants: json['participants'] as List,
+        date: json['date'] == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(
+                json['date'].millisecondsSinceEpoch));
   }
-  Map toJson(GroupModel model) {
-    return {'participants': model.participants};
+  Map toJson() {
+    return {'participants': participants, 'date': date};
   }
 }

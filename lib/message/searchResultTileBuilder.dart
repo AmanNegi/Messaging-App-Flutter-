@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:messaging_app_new/data/sharedPrefs.dart';
 import 'package:messaging_app_new/groupModel.dart';
 import 'package:messaging_app_new/message/messagePage.dart';
-import 'package:messaging_app_new/message/messageRepo.dart';
 import 'package:messaging_app_new/user/user.dart';
 import '../consts/theme.dart';
 
@@ -21,11 +20,11 @@ class SearchResultTileBuilder extends StatelessWidget {
         onTap: () async {
           var model = GroupModel(participants: [
             user.uid,
-            sharedPrefs.getValueFromSharedPrefs('uid')
-          ]);
+            sharedPrefs.getValueFromSharedPrefs('uid'),
+          ], date: DateTime.now());
 
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => MessagePage(model)));
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => MessagePage(model, user)));
         },
         child: Ink(
           height: 0.15 * height,
@@ -33,7 +32,7 @@ class SearchResultTileBuilder extends StatelessWidget {
             elevation: 0,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15.0)),
-            color: mainColor.withOpacity(0.3),
+            color: AppTheme.mainColor.withOpacity(0.3),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,

@@ -24,18 +24,23 @@ class StorageService {
 
   Future uploadChatImage(
       PickedFile file, String documentID, DateTime time) async {
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('chats/$documentID/${time.millisecondsSinceEpoch.toString()}');
-    File properFile = File(file.path);
+    try {
+      StorageReference storageReference = FirebaseStorage.instance
+          .ref()
+          .child('chats/$documentID/${time.millisecondsSinceEpoch.toString()}');
+      File properFile = File(file.path);
 
-    StorageUploadTask uploadTask = storageReference.putFile(properFile);
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    var url = await storageReference.getDownloadURL();
+      StorageUploadTask uploadTask = storageReference.putFile(properFile);
+      await uploadTask.onComplete;
+      print('File Uploaded');
+      var url = await storageReference.getDownloadURL();
 
-    chatImageUrl.add(url);
-    return url;
+      chatImageUrl.add(url);
+      return url;
+    } catch (e) {
+      Fluttertoast.showToast(msg: "An error occured while uploading the image");
+      return null;
+    }
   }
 
   uploadFile(PickedFile file) async {

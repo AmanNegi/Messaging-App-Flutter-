@@ -27,12 +27,12 @@ class ImageFullScreen extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white
+                color: Theme.of(context).cardColor
               ),
               child: IconButton(
                   icon: Icon(
                     Icons.arrow_back,
-                    color: textColor,
+                    color:AppTheme. textColor,
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();

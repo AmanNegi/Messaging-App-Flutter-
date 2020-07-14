@@ -15,11 +15,13 @@ import 'package:messaging_app_new/message/buildMessageWidget.dart';
 import 'package:messaging_app_new/message/message.dart';
 import 'package:messaging_app_new/message/messageRepo.dart';
 import 'package:messaging_app_new/user/storage.dart';
+import 'package:messaging_app_new/user/user.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MessagePage extends StatefulWidget {
   GroupModel model;
-  MessagePage(this.model);
+  User user;
+  MessagePage(this.model, this.user);
 
   @override
   _MessagePageState createState() => _MessagePageState();
@@ -39,11 +41,11 @@ class _MessagePageState extends State<MessagePage>
 
   AnimationController animationController;
   Animation rotationAnimation;
-  var photoColor = Colors.black;
+  var photoColor = AppTheme.iconColor;
 
   _getDataFromApi() async {
     isLoadingSubject.add(true);
-
+    print(model.toJson().toString());
     await messageRepo.setReference(model);
     documentId = await messageRepo.getGroupDocumentId(model);
     isLoadingSubject.add(false);
@@ -94,7 +96,8 @@ class _MessagePageState extends State<MessagePage>
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).canvasColor,
+          title: Text("${widget.user.userName}"),
+          //   backgroundColor: Theme.of(context).canvasColor,
           elevation: 0,
           automaticallyImplyLeading: false,
           actions: <Widget>[
@@ -103,14 +106,11 @@ class _MessagePageState extends State<MessagePage>
               onSelected: (value) {
                 print("in print value: " + value.toString());
                 if (value == 0) {
-                  messageRepo.deleteGroup(model);
+                  messageRepo.clearChat(model);
                   Navigator.of(context).pop();
                 }
               },
-              icon: Icon(
-                MdiIcons.dotsVerticalCircleOutline,
-                color: textColor,
-              ),
+              icon: Icon(MdiIcons.dotsVertical, color: Colors.white),
               itemBuilder: (context) {
                 return [
                   PopupMenuItem(
@@ -126,8 +126,8 @@ class _MessagePageState extends State<MessagePage>
               Navigator.of(context).pop();
             },
             icon: Icon(
-              Icons.arrow_back,
-              color: textColor,
+              MdiIcons.arrowLeft,
+              color: Colors.white,
             ),
           ),
         ),
@@ -210,11 +210,9 @@ class _MessagePageState extends State<MessagePage>
                         padding: const EdgeInsets.all(8.0),
                         child: TextField(
                           controller: controller,
-                          style: GoogleFonts.aBeeZee(),
                           cursorRadius: Radius.circular(20.0),
                           decoration: InputDecoration(
                             isDense: true,
-                            hintStyle: GoogleFonts.aBeeZee(),
                             contentPadding: EdgeInsets.only(
                                 left: 10.0, right: 10.0, bottom: 5.0),
                             hintText: "Type your message.",
@@ -249,15 +247,18 @@ class _MessagePageState extends State<MessagePage>
                       icon: Icon(Icons.send),
                       onPressed: () {
                         if (controller.text.length > 0) {
-                          messageRepo.addMessage(Message(
-                              date: DateTime.now(),
-                              message: controller.text,
-                              idFrom:
-                                  sharedPrefs.getValueFromSharedPrefs('uid'),
-                              idTo: idTo,
-                              isSeen: false,
-                              documentId: documentId,
-                              type: 0));
+                          messageRepo.addMessage(
+                              Message(
+                                  date: DateTime.now(),
+                                  message: controller.text,
+                                  idFrom: sharedPrefs
+                                      .getValueFromSharedPrefs('uid'),
+                                  idTo: idTo,
+                                  isSeen: false,
+                                  documentId: documentId,
+                                  type: 0),
+                              model,
+                              documentId);
                           setState(() {
                             controller.text = "";
                           });
@@ -277,7 +278,7 @@ class _MessagePageState extends State<MessagePage>
 
   _onPressedPhotoIcon() async {
     setState(() {
-      photoColor = accentColor;
+      photoColor = AppTheme.accentColor;
     });
     animationController.repeat();
 
@@ -287,27 +288,29 @@ class _MessagePageState extends State<MessagePage>
       Fluttertoast.showToast(msg: "The image may take a while to display");
       storageService.uploadChatImage(value, documentId, time).then((url) {
         print(url);
-        Message message = Message(
-            documentId: documentId,
-            type: 1,
-            date: time,
-            idFrom: idFrom,
-            idTo: idTo,
-            message: "Image",
-            imageUrl: url,
-            isSeen: false);
+        if (url != null) {
+          Message message = Message(
+              documentId: documentId,
+              type: 1,
+              date: time,
+              idFrom: idFrom,
+              idTo: idTo,
+              message: "Image",
+              imageUrl: url,
+              isSeen: false);
 
-        messageRepo.addMessage(message);
+          messageRepo.addMessage(message, model, documentId);
+        }
 
         animationController.stop();
         setState(() {
-          photoColor = Colors.black;
+          photoColor = AppTheme.iconColor;
         });
       });
     } else {
       animationController.stop();
       setState(() {
-        photoColor = Colors.black;
+        photoColor = AppTheme.iconColor;
       });
     }
   }

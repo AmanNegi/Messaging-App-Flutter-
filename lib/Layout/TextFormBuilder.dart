@@ -1,11 +1,12 @@
 import "package:flutter/material.dart";
 import 'package:google_fonts/google_fonts.dart';
+import 'package:messaging_app_new/consts/theme.dart';
 
 class TextFormBuilder extends StatelessWidget {
   String hintText;
   Function validator;
   Function onSaved;
-
+  TextEditingController controller;
   Icon icon;
   TextInputType keybordType;
   TextFormBuilder({
@@ -13,29 +14,37 @@ class TextFormBuilder extends StatelessWidget {
     this.validator,
     this.onSaved,
     this.icon,
+    this.controller,
     this.keybordType,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      maxLines: 1,
-      keyboardType: keybordType,
-      validator: validator,
-      autocorrect: false,
-      onSaved: onSaved,
-      onChanged: (v){
-        
-      },
-      style: GoogleFonts.aBeeZee(),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: GoogleFonts.aBeeZee(),
-        prefixIcon: icon,
-        border: OutlineInputBorder(
-          borderSide: BorderSide(width: 1),
-          gapPadding: 10.0,
-          borderRadius: BorderRadius.circular(10.0),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30.0),
+      child: Container(
+        color: Colors.white,
+        child: TextFormField(
+          controller: controller,
+          maxLines: 1,
+          keyboardType: keybordType,
+          // validator: validator,
+          autocorrect: false,
+          onSaved: onSaved,
+          onChanged: (v) {},
+          style: TextStyle(
+            fontFamily: AppTheme.fontFamily,
+          ),
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.all(20.0),
+            fillColor: Colors.white,
+            hintText: hintText,
+            hintStyle: TextStyle(
+              fontFamily: AppTheme.fontFamily,
+            ),
+            prefixIcon: icon,
+            border: InputBorder.none,
+          ),
         ),
       ),
     );

@@ -28,7 +28,7 @@ class _UserInfoState extends State<UserInfo> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: mainColor,
+        backgroundColor:AppTheme. mainColor,
         title: Text("User info"),
         centerTitle: true,
       ),

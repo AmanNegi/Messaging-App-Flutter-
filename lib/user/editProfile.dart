@@ -37,7 +37,7 @@ class _EditProfileState extends State<EditProfile> {
     return Scaffold(
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: mainColor,
+          backgroundColor:AppTheme. mainColor,
           centerTitle: true,
           title: Text("Edit profile"),
         ),

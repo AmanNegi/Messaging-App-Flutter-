@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:messaging_app_new/consts/theme.dart';
 
@@ -17,7 +18,6 @@ class _SignUpPageState extends State<SignUpPage>
     with SingleTickerProviderStateMixin {
   AnimationController _animationController;
   Animation _animation;
-  var key = GlobalKey<FormState>();
 
   String buttonText = signUp;
   String helperText = signUpHelperText;
@@ -29,13 +29,17 @@ class _SignUpPageState extends State<SignUpPage>
   bool error = false;
   bool isLoading = false;
   bool isVerified = false;
-
+  var height;
   RegExp r = new RegExp(
       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$',
       caseSensitive: false);
 
+  TextEditingController emailController, passwordController;
+
   @override
   void initState() {
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
     super.initState();
 
     _animationController =
@@ -93,98 +97,135 @@ class _SignUpPageState extends State<SignUpPage>
   @override
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width;
+    height = MediaQuery.of(context).size.height;
     return Scaffold(
-        appBar: AppBar(
-          title: Text(buttonText),
-        ),
-        body: _buildBody());
-  }
-
-  _buildBody() {
-    if (isLoading) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    } else {
-      return _buildForm();
-    }
+      resizeToAvoidBottomInset: false,
+      body: _buildForm(),
+    );
   }
 
   _buildForm() {
-    return Form(
-      key: key,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Container(
-            decoration: BoxDecoration(
-                color: mainColor.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(10.0)),
-            height: 400,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: TextFormBuilder(
-                    hintText: "Email",
-                    icon: Icon(Icons.email),
-                    keybordType: TextInputType.emailAddress,
-                    onSaved: (val) {
-                      email = val;
-                    },
-                    validator: (val) {
-                      if (!r.hasMatch(val)) {
-                        return "Enter a valid Email";
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: TextFormBuilder(
-                    hintText: "Password",
-                    icon: Icon(Icons.keyboard),
-                    keybordType: TextInputType.visiblePassword,
-                    onSaved: (val) {
-                      setState(() {
-                        password = val;
-                      });
-                    },
-                    validator: (val) {
-                      if (val.length < 6) {
-                        return "Enter more than 6 characters";
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                AnimatedBuilder(
-                  animation: _animation,
-                  builder: (BuildContext context, Widget child) {
-                    return Transform(
-                      child: child,
-                      transform: Matrix4.translationValues(
-                          _animation.value * width, 0, 0),
-                    );
-                  },
-                  child: RaisedButton(
-                    color: accentColor.withOpacity(0.7),
-                    onPressed: _getSignInOrLogin(buttonText) == 1
-                        ? _onPressedsignUpButton
-                        : _onPressedLoginButton,
-                    child: Text(
-                      buttonText,
-                      style: TextStyle(color: buttonTextColor),
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(
+          child: Opacity(
+            opacity: isLoading ? 0.6 : 1.0,
+            child: Image.asset(
+              "assets/giphy.gif",
+              fit: BoxFit.cover,
+              height: height,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0.4 * height,
+          left: 0,
+          right: 0,
+          child: Opacity(
+            opacity: isLoading ? 0.6 : 1.0,
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                    child: TextFormBuilder(
+                      hintText: "Email",
+                      controller: emailController,
+                      //   icon: Icon(Icons.email),
+                      keybordType: TextInputType.emailAddress,
+                      onSaved: (val) {
+                        email = val;
+                      },
+                      validator: (val) {
+                        if (!r.hasMatch(val)) {
+                          return "Enter a valid Email";
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                ),
-                _buildHelperText(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                    child: TextFormBuilder(
+                      controller: passwordController,
+                      hintText: "Password",
+                      ////   icon: Icon(Icons.keyboard),
+                      keybordType: TextInputType.visiblePassword,
+                      onSaved: (val) {
+                        setState(() {
+                          password = val;
+                        });
+                      },
+                      validator: (val) {
+                        if (val.length < 6) {
+                          return "Enter more than 6 characters";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 60.0),
+                  AnimatedBuilder(
+                    animation: _animation,
+                    builder: (BuildContext context, Widget child) {
+                      return Transform(
+                        child: child,
+                        transform: Matrix4.translationValues(
+                            _animation.value * width, 0, 0),
+                      );
+                    },
+                    child: _buildRaisedButton(),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _buildHelperText(),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Center(
+          child: Visibility(
+            visible: isLoading,
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Colors.deepOrange),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  _buildRaisedButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(30.0),
+        onTap: _getSignInOrLogin(buttonText) == 1
+            ? _onPressedsignUpButton
+            : _onPressedLoginButton,
+        child: Ink(
+          width: 0.9 * width,
+          height: 0.07 * height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30.0),
+            gradient: LinearGradient(
+              colors: [
+                fromHex('#ff5f6d'),
+                fromHex('#ffc371d'),
               ],
             ),
           ),
+          child: Center(
+              child: Text(
+            buttonText,
+            style: TextStyle(color: Colors.white),
+          )),
         ),
       ),
     );
@@ -199,9 +240,10 @@ class _SignUpPageState extends State<SignUpPage>
   }
 
   _onPressedLoginButton() async {
-    if (key.currentState.validate()) {
-      key.currentState.save();
-      FirebaseUser user = await authService.login(email, password);
+    if (!(emailController.text.length <= 0) &&
+        !(passwordController.text.length <= 0)) {
+      FirebaseUser user = await authService.login(
+          emailController.text, passwordController.text);
       if (isVerified && !error) {
         Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (BuildContext context) => MainPage()));
@@ -210,6 +252,8 @@ class _SignUpPageState extends State<SignUpPage>
           _buildVerificationDialog();
         }
       }
+    } else {
+      Fluttertoast.showToast(msg: "Enter valid details");
     }
   }
 
@@ -282,9 +326,10 @@ class _SignUpPageState extends State<SignUpPage>
   }
 
   _onPressedsignUpButton() async {
-    if (key.currentState.validate()) {
-      key.currentState.save();
-      FirebaseUser user = await authService.signUp(email, password);
+    if (!(emailController.text.length <= 0) &&
+        !(passwordController.text.length <= 0)) {
+      FirebaseUser user = await authService.signUp(
+          emailController.text, passwordController.text);
       if (isVerified && !error) {
         Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (BuildContext context) => MainPage()));
@@ -293,14 +338,23 @@ class _SignUpPageState extends State<SignUpPage>
           _buildVerificationDialog();
         }
       }
+    } else {
+      Fluttertoast.showToast(msg: "Enter valid details");
     }
   }
 
   _buildHelperText() {
     return GestureDetector(
-        child: Text(helperText, style: TextStyle(color: mainColor)),
+        child: Text(helperText, style: TextStyle(color:Colors.white)),
         onTap: () {
           _animationController.forward();
         });
   }
+}
+
+Color fromHex(String hexString) {
+  final buffer = StringBuffer();
+  if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+  buffer.write(hexString.replaceFirst('#', ''));
+  return Color(int.parse(buffer.toString(), radix: 16));
 }

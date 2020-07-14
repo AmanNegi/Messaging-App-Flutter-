@@ -6,6 +6,7 @@ import 'package:messaging_app_new/message/message.dart';
 import 'package:intl/intl.dart';
 import 'package:messaging_app_new/message/messageDetail.dart';
 import 'package:messaging_app_new/message/messageRepo.dart';
+import 'package:messaging_app_new/message/receivedMessageDetail.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../consts/theme.dart';
 
@@ -63,77 +64,109 @@ class BuildMessageWidget extends StatelessWidget {
 
   _getImageWidget(BuildContext context) {
     if (idFrom == currentUserId) {
-      return Align(
-        alignment: Alignment.centerRight,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 10.0, top: 10.0),
-          child: ClipRRect(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20.0),
-              topLeft: Radius.circular(20.0),
-              topRight: Radius.circular(20.0),
+      return Container(
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(
+              right: 5.0,
             ),
-            child: Stack(
-              children: <Widget>[
-                AnimatedContainer(
-                  duration: Duration(milliseconds: 500),
-                  constraints: BoxConstraints(maxWidth: width * 0.7),
-                  padding: EdgeInsets.only(
-                    top: 15.0,
-                    left: 15.0,
-                    right: 10.0,
-                    bottom: 5.0,
-                  ),
-                  color: message.isSeen ? isSeen.withOpacity(0.7) : notSeen,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      ClipRRect(
+            child: ClipRRect(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20.0),
+                topLeft: Radius.circular(20.0),
+                topRight: Radius.circular(20.0),
+              ),
+              child: Container(
+                decoration: BoxDecoration(boxShadow: [
+                  BoxShadow(
+                      blurRadius: 6.0,
+                      color: message.isSeen
+                          ? AppTheme.isSeen.withOpacity(0.3)
+                          : AppTheme.notSeen.withOpacity(0.1),
+                      offset: Offset(0.0, 5.0),
+                      spreadRadius: 1.0)
+                ]),
+                child: Stack(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: ClipRRect(
                         borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(20.0),
                           topLeft: Radius.circular(20.0),
                           topRight: Radius.circular(20.0),
                         ),
-                        child: Hero(
-                          tag: message.imageUrl,
-                          child: Image.network(
-                            message.imageUrl,
-                            height: 250,
-                            width: 300,
-                            fit: BoxFit.cover,
+                        child: AnimatedContainer(
+                          duration: Duration(milliseconds: 500),
+                          constraints: BoxConstraints(maxWidth: width * 0.7),
+                          padding: EdgeInsets.only(
+                            top: 15.0,
+                            left: 15.0,
+                            right: 10.0,
+                            bottom: 5.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: message.isSeen
+                                ? AppTheme.isSeen.withOpacity(0.7)
+                                : Theme.of(context).cardColor,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              ClipRRect(
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(20.0),
+                                  topLeft: Radius.circular(20.0),
+                                  topRight: Radius.circular(20.0),
+                                ),
+                                child: Hero(
+                                  tag: message.imageUrl,
+                                  child: FadeInImage.assetNetwork(
+                                    placeholder: 'assets/loading.png',
+                                    image: message.imageUrl,
+                                    height: 250,
+                                    width: 300,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 5.0,
+                              ),
+                              Text(date,
+                                  style: TextStyle(
+                                      color: message.isSeen
+                                          ? AppTheme.seenTimeColor
+                                          : AppTheme.notSeenTimeColor,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900)),
+                            ],
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: 5.0,
+                    ),
+                    Positioned.fill(
+                        child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) =>
+                                  ImageFullScreen(message.imageUrl)));
+                        },
+                        onDoubleTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => MessageDetail(
+                                    message: message,
+                                    documentId: documentId,
+                                  )));
+                        },
                       ),
-                      Text(date,
-                          style: GoogleFonts.aBeeZee(
-                              color: timeColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900)),
-                    ],
-                  ),
+                    )),
+                  ],
                 ),
-                Positioned.fill(
-                    child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) =>
-                              ImageFullScreen(message.imageUrl)));
-                    },
-                    onDoubleTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => MessageDetail(
-                                message: message,
-                                documentId: documentId,
-                              )));
-                    },
-                  ),
-                )),
-              ],
+              ),
             ),
           ),
         ),
@@ -144,7 +177,9 @@ class BuildMessageWidget extends StatelessWidget {
         child: Align(
           alignment: Alignment.centerLeft,
           child: Padding(
-            padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+            padding: const EdgeInsets.only(
+              left: 5.0,
+            ),
             child: ClipRRect(
               borderRadius: BorderRadius.only(
                 bottomRight: Radius.circular(20.0),
@@ -153,43 +188,69 @@ class BuildMessageWidget extends StatelessWidget {
               ),
               child: Stack(
                 children: <Widget>[
-                  Container(
-                    constraints: BoxConstraints(maxWidth: width * 0.7),
-                    padding: EdgeInsets.only(
-                      top: 15.0,
-                      left: 10.0,
-                      right: 15.0,
-                      bottom: 5.0,
-                    ),
-                    color: secondaryColor.withOpacity(0.9),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            bottomRight: Radius.circular(20.0),
-                            topLeft: Radius.circular(20.0),
-                            topRight: Radius.circular(20.0),
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: width * 0.7),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(20.0),
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0),
+                        ),
+                        color: AppTheme.notSeen.withOpacity(0.4),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).canvasColor,
+                            borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(20.0),
+                              topLeft: Radius.circular(20.0),
+                              topRight: Radius.circular(20.0),
+                            ),
                           ),
-                          child: Hero(
-                            tag: message.imageUrl,
-                            child: Image.network(
-                              message.imageUrl,
-                              height: 250,
-                              width: 300,
-                              fit: BoxFit.cover,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top: 15.0,
+                              left: 10.0,
+                              right: 15.0,
+                              bottom: 5.0,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                ClipRRect(
+                                  borderRadius: BorderRadius.only(
+                                    bottomRight: Radius.circular(20.0),
+                                    topLeft: Radius.circular(20.0),
+                                    topRight: Radius.circular(20.0),
+                                  ),
+                                  child: Hero(
+                                    tag: message.imageUrl,
+                                    child: FadeInImage.assetNetwork(
+                                      placeholder: 'assets/loading.png',
+                                      image: message.imageUrl,
+                                      height: 250,
+                                      width: 300,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5.0,
+                                ),
+                                Text(date,
+                                    style: TextStyle(
+                                        color: AppTheme.receivedTimeColor,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w900))
+                              ],
                             ),
                           ),
                         ),
-                        SizedBox(
-                          height: 5.0,
-                        ),
-                        Text(date,
-                            style: GoogleFonts.aBeeZee(
-                                color: timeColor,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900))
-                      ],
+                      ),
                     ),
                   ),
                   Positioned.fill(
@@ -201,7 +262,13 @@ class BuildMessageWidget extends StatelessWidget {
                               builder: (context) =>
                                   ImageFullScreen(message.imageUrl)));
                         },
-                        onDoubleTap: () {},
+                        onDoubleTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => ReceivedMessageDetail(
+                                    documentId: documentId,
+                                    message: message,
+                                  )));
+                        },
                       ),
                     ),
                   ),
@@ -219,54 +286,88 @@ class BuildMessageWidget extends StatelessWidget {
       return Align(
         alignment: Alignment.centerRight,
         child: Padding(
-          padding: const EdgeInsets.only(right: 10.0, top: 10.0),
+          padding: const EdgeInsets.only(right: 5.0),
           child: ClipRRect(
             borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(20.0),
               topLeft: Radius.circular(20.0),
               topRight: Radius.circular(20.0),
             ),
-            child: Stack(
-              children: <Widget>[
-                AnimatedContainer(
-                  duration: Duration(milliseconds: 500),
-                  constraints: BoxConstraints(maxWidth: width * 0.7),
-                  padding: EdgeInsets.only(
-                    top: 15.0,
-                    left: 15.0,
-                    right: 10.0,
-                    bottom: 5.0,
+            child: Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Stack(
+                children: <Widget>[
+                  AnimatedContainer(
+                    duration: Duration(milliseconds: 500),
+                    constraints: BoxConstraints(maxWidth: width * 0.7),
+                    padding: EdgeInsets.only(
+                      top: 15.0,
+                      left: 15.0,
+                      right: 10.0,
+                      bottom: 5.0,
+                    ),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20.0),
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0),
+                        ),
+                        color: message.isSeen
+                            ? AppTheme.isSeen.withOpacity(0.7)
+                            : Theme.of(context).cardColor,
+                        boxShadow: [
+                          BoxShadow(
+                              blurRadius: 3.0,
+                              color: message.isSeen
+                                  ? AppTheme.isSeen.withOpacity(0.3)
+                                  : AppTheme.shadowColor.withOpacity(0.1),
+                              offset: Offset(0.0, 2.0),
+                              spreadRadius: 2.0)
+                        ]),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        buildTextWithLinks(
+                            message.message,
+                            message.isSeen
+                                ? AppTheme.seenTextColor
+                                : AppTheme.notSeenTextColor),
+                        SizedBox(
+                          height: 5.0,
+                        ),
+                        Text(date,
+                            style: TextStyle(
+                                color: message.isSeen
+                                    ? AppTheme.seenTimeColor
+                                    : AppTheme.notSeenTimeColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900)),
+                      ],
+                    ),
                   ),
-                  color: message.isSeen ? isSeen.withOpacity(0.7) : notSeen,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      buildTextWithLinks(message.message, sendMessageTextColor),
-                      SizedBox(
-                        height: 5.0,
-                      ),
-                      Text(date,
-                          style: GoogleFonts.aBeeZee(
-                              color: timeColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900)),
-                    ],
-                  ),
-                ),
-                Positioned.fill(
+                  Positioned.fill(
                     child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onDoubleTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => MessageDetail(
-                                message: message,
-                                documentId: documentId,
-                              )));
-                    },
+                      color: Colors.transparent,
+                      child: InkWell(
+                        splashColor: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20.0),
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0),
+                        ),
+                        onTap: () {},
+                        onDoubleTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => MessageDetail(
+                                    message: message,
+                                    documentId: documentId,
+                                  )));
+                        },
+                      ),
+                    ),
                   ),
-                )),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -277,7 +378,9 @@ class BuildMessageWidget extends StatelessWidget {
         child: Align(
           alignment: Alignment.centerLeft,
           child: Padding(
-            padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+            padding: const EdgeInsets.only(
+              left: 5.0,
+            ),
             child: ClipRRect(
               borderRadius: BorderRadius.only(
                 bottomRight: Radius.circular(20.0),
@@ -286,29 +389,59 @@ class BuildMessageWidget extends StatelessWidget {
               ),
               child: Stack(
                 children: <Widget>[
-                  Container(
-                    constraints: BoxConstraints(maxWidth: width * 0.7),
-                    padding: EdgeInsets.only(
-                      top: 15.0,
-                      left: 10.0,
-                      right: 15.0,
-                      bottom: 5.0,
-                    ),
-                    color: secondaryColor.withOpacity(0.9),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        buildTextWithLinks(
-                            message.message, receivedMessageTextColor),
-                        SizedBox(
-                          height: 5.0,
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: width * 0.7),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(20.0),
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0),
                         ),
-                        Text(date,
-                            style: GoogleFonts.aBeeZee(
-                                color: timeColor,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w900))
-                      ],
+                        color: AppTheme.notSeen.withOpacity(0.5),
+                        /*  boxShadow: [
+                            BoxShadow(
+                                blurRadius: 3.0,
+                                color: AppTheme.notSeen.withOpacity(0.4),
+                                offset: Offset(0.0, 2.0),
+                                spreadRadius: 2.0)
+                          ] */
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).canvasColor,
+                            borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(20.0),
+                              topLeft: Radius.circular(20.0),
+                              topRight: Radius.circular(20.0),
+                            ),
+                          ),
+                          padding: EdgeInsets.only(
+                            top: 15.0,
+                            left: 10.0,
+                            right: 15.0,
+                            bottom: 5.0,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              buildTextWithLinks(message.message,
+                                  AppTheme.receivedMessageTextColor),
+                              SizedBox(
+                                height: 5.0,
+                              ),
+                              Text(date,
+                                  style: TextStyle(
+                                      color: AppTheme.receivedTimeColor,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900))
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   Positioned.fill(
@@ -316,10 +449,11 @@ class BuildMessageWidget extends StatelessWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         onDoubleTap: () {
-                          /*   Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => MessageDetail(
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => ReceivedMessageDetail(
                                     message: message,
-                                  ))); */
+                                    documentId: documentId,
+                                  )));
                         },
                       ),
                     ),
@@ -336,7 +470,7 @@ class BuildMessageWidget extends StatelessWidget {
 
 Text buildTextWithLinks(String textToLink, Color color) => Text.rich(TextSpan(
     children: linkify(textToLink),
-    style: GoogleFonts.aBeeZee(fontSize: 16.0, color: color)));
+    style: TextStyle(fontSize: 16.0, color: color)));
 
 Future<void> openUrl(String url) async {
   if (await canLaunch(url)) {
@@ -358,7 +492,7 @@ final RegExp linkRegExp = RegExp(
 
 WidgetSpan buildEmoteComponent(String text) {
   return WidgetSpan(
-      child: Text(
+      child: SelectableText(
     text,
     style: TextStyle(fontSize: 30),
   ));
@@ -367,10 +501,10 @@ WidgetSpan buildEmoteComponent(String text) {
 WidgetSpan buildLinkComponent(String text, String linkToOpen) => WidgetSpan(
         child: InkWell(
       child: Text(text,
-          style: GoogleFonts.abel(
+          style: TextStyle(
               fontSize: 16.0,
               decoration: TextDecoration.underline,
-              color: linkColor)),
+              color: AppTheme.mainColor)),
       onTap: () => openUrl(linkToOpen),
     ));
 

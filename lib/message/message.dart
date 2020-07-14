@@ -10,7 +10,7 @@ class Message {
   String documentId;
   int type;
   String imageUrl;
-
+  bool notificationShown = false;
   DocumentReference reference;
 
 //0 message : 1 image
@@ -21,6 +21,7 @@ class Message {
       @required this.date,
       @required this.documentId,
       @required this.type,
+      this.notificationShown = false,
       this.imageUrl,
       this.isSeen});
 
@@ -33,13 +34,16 @@ class Message {
   factory Message.fromJson(Map<dynamic, dynamic> json) {
     return Message(
         message: json['message'] as String,
-        date:
-            json['date'] == null ? null : (json['date'] as Timestamp).toDate(),
+        date: json['date'] == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(
+                json['date'].millisecondsSinceEpoch),
         idFrom: json['idFrom'] as String,
         idTo: json['idTo'] as String,
         isSeen: json['isSeen'] as bool,
         documentId: json['documentId'] as String,
         imageUrl: json['imageUrl'] as String,
+        notificationShown: json['notification'] as bool,
         type: json['type'] as int);
   }
 
@@ -52,7 +56,8 @@ class Message {
       'isSeen': isSeen,
       'documentId': documentId,
       'type': type,
-      'imageUrl': imageUrl
+      'imageUrl': imageUrl,
+      'notificationShown': notificationShown
     };
   }
 }
