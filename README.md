@@ -1,5 +1,5 @@
 # Messaging App - Flutter & Firebase
-
+![Made with Love in India](https://madewithlove.org.in/badge.svg)
 > version 1.0.0
 
 Messaging app is a nicely designed and developed mobile application developed using Flutter. Flutter is an open-source mobile application development SDK created by Google and used to develop applications for Android and iOS.
@@ -132,4 +132,4 @@ For help getting started with Flutter, check [online documentation](https://flut
 
 * Gmail : akuro787898@gmail.com
 * Facebook : https://www.facebook.com/flyWithFlutter
-![Made with Love in India](https://madewithlove.org.in/badge.svg)
+
