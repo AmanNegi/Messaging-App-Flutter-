@@ -31,9 +31,11 @@ Messaging App comes with 8 screen application pages. It comes with both light an
   <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/sign_out_dialog.png" width="100" />
   <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/uid_dialog.png" width="100" /> 
   <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/user_info.png" width="100" /> 
-    <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/search_user.png" width="100" />
-    <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/search_Result.png" width="100" />
-    <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/received_message_detail.png" width="100" />
+  <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/search_user.png" width="100" />
+  <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/search_Result.png" width="100" />
+  <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/received_message_detail.png" width="100" />
+  <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/theme_settings.png" width="100" />
+  <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/data_dialog.png" width="100" />
 </p>
  Working Video https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/walkthrough.mp4
 
