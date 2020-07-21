@@ -36,6 +36,10 @@ class SharedPrefs {
   getIntFromSharedPrefs(String key) {
     return sharedPreferences.getInt(key);
   }
+
+  clearSharedPrefsData() {
+    return sharedPreferences.clear();
+  }
 }
 
 SharedPrefs sharedPrefs = SharedPrefs();

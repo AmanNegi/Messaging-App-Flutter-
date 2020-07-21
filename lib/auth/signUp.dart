@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:messaging_app_new/Layout/verificationDialog.dart';
 import 'package:messaging_app_new/consts/theme.dart';
 
 import '../Layout/TextFormBuilder.dart';
@@ -16,16 +17,16 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage>
     with SingleTickerProviderStateMixin {
+  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  AuthService authService;
   AnimationController _animationController;
   Animation _animation;
-
-  String buttonText = signUp;
-  String helperText = signUpHelperText;
+  String buttonText = login;
+  String helperText = loginHelperText;
   String email;
   String password;
 
   double width;
-
   bool error = false;
   bool isLoading = false;
   bool isVerified = false;
@@ -34,12 +35,15 @@ class _SignUpPageState extends State<SignUpPage>
       r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$',
       caseSensitive: false);
 
+  var obscureText = true;
+  IconData currentIcon = Icons.visibility_off;
   TextEditingController emailController, passwordController;
 
   @override
   void initState() {
     emailController = TextEditingController();
     passwordController = TextEditingController();
+    authService = AuthService(scaffoldKey);
     super.initState();
 
     _animationController =
@@ -99,6 +103,7 @@ class _SignUpPageState extends State<SignUpPage>
     width = MediaQuery.of(context).size.width;
     height = MediaQuery.of(context).size.height;
     return Scaffold(
+      key: scaffoldKey,
       resizeToAvoidBottomInset: false,
       body: _buildForm(),
     );
@@ -130,9 +135,9 @@ class _SignUpPageState extends State<SignUpPage>
                   Padding(
                     padding: const EdgeInsets.only(left: 10.0, right: 10.0),
                     child: TextFormBuilder(
+                      textStyle: TextStyle(color: Colors.grey),
                       hintText: "Email",
                       controller: emailController,
-                      //   icon: Icon(Icons.email),
                       keybordType: TextInputType.emailAddress,
                       onSaved: (val) {
                         email = val;
@@ -151,9 +156,22 @@ class _SignUpPageState extends State<SignUpPage>
                   Padding(
                     padding: const EdgeInsets.only(left: 10.0, right: 10.0),
                     child: TextFormBuilder(
+                      textStyle: TextStyle(color: Colors.grey),
+                      obscureText: obscureText,
+                      suffixWidget: IconButton(
+                        icon: Icon(currentIcon),
+                        onPressed: () {
+                          setState(() {
+                            obscureText = !obscureText;
+                            if (obscureText)
+                              currentIcon = Icons.visibility_off;
+                            else
+                              currentIcon = Icons.visibility;
+                          });
+                        },
+                      ),
                       controller: passwordController,
                       hintText: "Password",
-                      ////   icon: Icon(Icons.keyboard),
                       keybordType: TextInputType.visiblePassword,
                       onSaved: (val) {
                         setState(() {
@@ -253,7 +271,9 @@ class _SignUpPageState extends State<SignUpPage>
         }
       }
     } else {
-      Fluttertoast.showToast(msg: "Enter valid details");
+      scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text("Enter valid Details"),
+      ));
     }
   }
 
@@ -262,67 +282,12 @@ class _SignUpPageState extends State<SignUpPage>
         barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
-          return SimpleDialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0)),
-            children: <Widget>[
-              Container(
-                child: Card(
-                  elevation: 0,
-                  child: _buildDialogContent(context),
-                ),
-              ),
-            ],
-          );
+          return VerificationDialog(() {
+            if (!isVerified) {
+              authService.sendVerification();
+            }
+          });
         });
-  }
-
-  Column _buildDialogContent(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Text(
-          dialogVerificationTitle,
-          textAlign: TextAlign.start,
-          style: GoogleFonts.aBeeZee(
-            fontSize: 20,
-          ),
-        ),
-        Divider(
-          thickness: 3.0,
-        ),
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Text(dialogVerificationBodyText),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RaisedButton(
-                color: Colors.lightGreen[400],
-                onPressed: () {
-                  if (!isVerified) {
-                    authService.sendVerification();
-                  }
-                },
-                child: Text("Re-Send"),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RaisedButton(
-                color: Colors.red[200],
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text("Cancel"),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
   }
 
   _onPressedsignUpButton() async {
@@ -339,13 +304,15 @@ class _SignUpPageState extends State<SignUpPage>
         }
       }
     } else {
-      Fluttertoast.showToast(msg: "Enter valid details");
+      scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text("Enter valid Details"),
+      ));
     }
   }
 
   _buildHelperText() {
     return GestureDetector(
-        child: Text(helperText, style: TextStyle(color:Colors.white)),
+        child: Text(helperText, style: TextStyle(color: Colors.white)),
         onTap: () {
           _animationController.forward();
         });

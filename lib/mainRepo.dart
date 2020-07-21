@@ -1,8 +1,5 @@
-import 'package:flutter/material.dart';
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:messaging_app_new/user/user.dart';
-import 'package:rxdart/rxdart.dart';
 import './data/sharedPrefs.dart';
 
 class MainRepo {
@@ -27,13 +24,13 @@ class MainRepo {
   }
 
   Future<User> getUserFromUid(String uid) async {
-    // id : G37dw3hfFnV54d5AmB1sb7Qc0Fo1 :--
+    print('getting user from uid : $uid');
     QuerySnapshot a = await Firestore.instance
         .collection('user')
         .where('uid', isEqualTo: uid)
         .getDocuments();
     User user = User.fromJson(a.documents[0].data);
-    print(user.userName);
+
     return user;
   }
 }

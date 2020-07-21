@@ -22,7 +22,7 @@ class SearchRepo {
     return true;
   }
 
-  Future<int> checkUserExistsByUserName(String userName) async {
+  Future<bool> checkUserExistsByUserName(String userName) async {
     loading.add(true);
     var documents = await reference.getDocuments();
     var a = documents.documents.where((element) {
@@ -37,10 +37,10 @@ class SearchRepo {
 
     if (value.length <= 0) {
       searchResult.add([]);
-      return 0;
+      return false;
     }
     searchResult.add(value);
-    return 1;
+    return true;
   }
 
   Future getConfirmedUser(String uid) async {

@@ -1,16 +1,20 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
 
-import 'package:messaging_app_new/errorHelper.dart';
 import 'package:messaging_app_new/user/UserRepo.dart';
 import 'package:messaging_app_new/user/user.dart';
 import '../data/strings.dart';
 import '../data/sharedPrefs.dart';
+import '../appData.dart';
 
 class AuthService {
+  GlobalKey<ScaffoldState> scaffoldKey;
+  AuthService(this.scaffoldKey);
+
   FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   PublishSubject errorHandler = PublishSubject();
@@ -37,7 +41,9 @@ class AuthService {
     } catch (error) {
       if (error is PlatformException) {
         errorHandler.add(true);
-        ErrorHelper(errorText: error.code.toString()).showErrorText();
+        scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(error.code.toString()),
+        ));
       }
       loading.add(false);
       return null;
@@ -55,6 +61,7 @@ class AuthService {
         userEmailVerified.add(true);
         _addToFirebaseDatabase();
         sharedPrefs.addItemToSharedPrefs("uid", user.uid.toString());
+        sharedPrefs.addBoolToSharedPrefs('isLoggedIn', true);
       }
     });
   }
@@ -101,12 +108,12 @@ class AuthService {
     } catch (error) {
       if (error is PlatformException) {
         errorHandler.add(true);
-        ErrorHelper(errorText: error.code.toString()).showErrorText();
+        scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(error.code.toString()),
+        ));
       }
       loading.add(false);
       return null;
     }
   }
 }
-
-AuthService authService = AuthService();

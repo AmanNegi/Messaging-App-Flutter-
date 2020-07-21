@@ -1,26 +1,24 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_svg/parser.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:mdi/mdi.dart';
 import 'package:messaging_app_new/consts/theme.dart';
 import 'package:messaging_app_new/data/sharedPrefs.dart';
 import 'package:messaging_app_new/groupModel.dart';
 import 'package:messaging_app_new/message/buildMessageWidget.dart';
+import 'package:messaging_app_new/message/demo.dart';
 import 'package:messaging_app_new/message/message.dart';
 import 'package:messaging_app_new/message/messageRepo.dart';
 import 'package:messaging_app_new/user/storage.dart';
 import 'package:messaging_app_new/user/user.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 class MessagePage extends StatefulWidget {
-  GroupModel model;
-  User user;
+  final GroupModel model;
+  final User user;
   MessagePage(this.model, this.user);
 
   @override
@@ -31,6 +29,7 @@ class _MessagePageState extends State<MessagePage>
     with SingleTickerProviderStateMixin {
   GroupModel model;
 
+  var scaffoldKey = GlobalKey<ScaffoldState>();
   var messageEntered = "";
   var idTo, idFrom;
   var documentId;
@@ -39,10 +38,14 @@ class _MessagePageState extends State<MessagePage>
   var isLoading = true;
   PublishSubject isLoadingSubject = PublishSubject();
 
+  ScrollController scrollController;
+  bool showGoToTopFab = false;
+  bool showDemo = true;
   AnimationController animationController;
   Animation rotationAnimation;
   var photoColor = AppTheme.iconColor;
-
+  var height;
+  var anotherUserName;
   _getDataFromApi() async {
     isLoadingSubject.add(true);
     print(model.toJson().toString());
@@ -59,6 +62,7 @@ class _MessagePageState extends State<MessagePage>
 
   @override
   void initState() {
+    scrollController = ScrollController();
     model = widget.model;
     idFrom = sharedPrefs.getValueFromSharedPrefs('uid');
     animationController = AnimationController(
@@ -82,6 +86,19 @@ class _MessagePageState extends State<MessagePage>
         isLoading = value;
       });
     });
+
+    scrollController.addListener(() {
+      if (scrollController.offset ==
+          scrollController.position.minScrollExtent) {
+        setState(() {
+          showGoToTopFab = false;
+        });
+      } else {
+        setState(() {
+          showGoToTopFab = true;
+        });
+      }
+    });
   }
 
   _getAnotherUserId() {
@@ -94,23 +111,56 @@ class _MessagePageState extends State<MessagePage>
 
   @override
   Widget build(BuildContext context) {
+    height = MediaQuery.of(context).size.height;
     return Scaffold(
+        key: scaffoldKey,
+        floatingActionButton: Visibility(
+          visible: showGoToTopFab,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              FloatingActionButton(
+                onPressed: () {
+                  scrollController.animateTo(
+                      scrollController.position.minScrollExtent,
+                      duration: Duration(milliseconds: 500),
+                      curve: Curves.fastOutSlowIn);
+                },
+                child: Icon(Mdi.menuDown),
+              ),
+              SizedBox(
+                height: 0.075 * height,
+              )
+            ],
+          ),
+        ),
         appBar: AppBar(
-          title: Text("${widget.user.userName}"),
-          //   backgroundColor: Theme.of(context).canvasColor,
+          title: Hero(
+            tag: widget.user.userName,
+            child: Material(
+              child: Text(
+                "${widget.user.userName}",
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: AppTheme.textColor),
+              ),
+            ),
+          ),
+          backgroundColor: Theme.of(context).canvasColor,
           elevation: 0,
           automaticallyImplyLeading: false,
           actions: <Widget>[
             PopupMenuButton(
               offset: Offset(0, 50.0),
               onSelected: (value) {
-                print("in print value: " + value.toString());
                 if (value == 0) {
                   messageRepo.clearChat(model);
                   Navigator.of(context).pop();
                 }
               },
-              icon: Icon(MdiIcons.dotsVertical, color: Colors.white),
+              icon: Icon(MdiIcons.dotsVertical, color: AppTheme.iconColor),
               itemBuilder: (context) {
                 return [
                   PopupMenuItem(
@@ -126,8 +176,8 @@ class _MessagePageState extends State<MessagePage>
               Navigator.of(context).pop();
             },
             icon: Icon(
-              MdiIcons.arrowLeft,
-              color: Colors.white,
+              MdiIcons.chevronLeft,
+              color: AppTheme.iconColor,
             ),
           ),
         ),
@@ -143,7 +193,6 @@ class _MessagePageState extends State<MessagePage>
     return StreamBuilder(
       stream: messageRepo.getStream(),
       builder: (context, AsyncSnapshot snapshot) {
-        print(snapshot.data.toString());
         if (snapshot.hasData) {
           return _buildMainWidget(snapshot.data);
         } else if (snapshot.connectionState == ConnectionState.active) {
@@ -172,10 +221,10 @@ class _MessagePageState extends State<MessagePage>
         color: Colors.transparent,
         margin: EdgeInsets.only(bottom: 60.0),
         child: ListView.builder(
+          physics: BouncingScrollPhysics(),
+          controller: scrollController,
           reverse: true,
           itemBuilder: (context, index) {
-            print(" ${index + 1} -- ${list.length}");
-            print(" abc ");
             return BuildMessageWidget(
                 list[index],
                 sharedPrefs.getValueFromSharedPrefs('uid'),
@@ -186,9 +235,12 @@ class _MessagePageState extends State<MessagePage>
         ),
       );
     } else {
-      return Center(
-        child: Text(" No message try sending one"),
-      );
+      if (showDemo) {
+        return Center(
+          child: DemoPage(scaffoldKey),
+        );
+      }
+      return Container();
     }
   }
 
@@ -209,21 +261,20 @@ class _MessagePageState extends State<MessagePage>
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: TextField(
+                          onTap: () {
+                            setState(() {
+                              showDemo = false;
+                            });
+                          },
                           controller: controller,
                           cursorRadius: Radius.circular(20.0),
                           decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.only(
-                                left: 10.0, right: 10.0, bottom: 5.0),
-                            hintText: "Type your message.",
-                            border: UnderlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: BorderSide(
-                                width: 5.0,
-                                style: BorderStyle.solid,
-                              ),
-                            ),
-                          ),
+                              isDense: true,
+                              contentPadding: EdgeInsets.only(
+                                  left: 10.0, right: 10.0, bottom: 5.0),
+                              hintText: "Type your message.",
+                              alignLabelWithHint: true,
+                              border: InputBorder.none),
                         ),
                       ),
                     ),
@@ -236,6 +287,7 @@ class _MessagePageState extends State<MessagePage>
                       },
                       animation: animationController,
                       child: IconButton(
+                        tooltip: 'Send a photo',
                         icon: Icon(
                           MdiIcons.googlePhotos,
                           color: photoColor,
@@ -244,7 +296,11 @@ class _MessagePageState extends State<MessagePage>
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.send),
+                      tooltip: 'Send',
+                      icon: Icon(
+                        Icons.send,
+                        color: AppTheme.mainColor,
+                      ),
                       onPressed: () {
                         if (controller.text.length > 0) {
                           messageRepo.addMessage(
@@ -285,7 +341,14 @@ class _MessagePageState extends State<MessagePage>
     DateTime time = DateTime.now();
     var value = await storageService.pickFile();
     if (value != null) {
-      Fluttertoast.showToast(msg: "The image may take a while to display");
+      // Fluttertoast.showToast(msg: "The image may take a while to display");
+      scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text(
+          "The image may take a while to display",
+          style: TextStyle(color: AppTheme.textColor),
+        ),
+        backgroundColor: Theme.of(context).cardColor,
+      ));
       storageService.uploadChatImage(value, documentId, time).then((url) {
         print(url);
         if (url != null) {

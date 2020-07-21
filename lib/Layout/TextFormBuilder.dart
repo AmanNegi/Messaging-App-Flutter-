@@ -7,16 +7,19 @@ class TextFormBuilder extends StatelessWidget {
   Function validator;
   Function onSaved;
   TextEditingController controller;
-  Icon icon;
+  Widget suffixWidget;
+  TextStyle textStyle;
   TextInputType keybordType;
-  TextFormBuilder({
-    this.hintText,
-    this.validator,
-    this.onSaved,
-    this.icon,
-    this.controller,
-    this.keybordType,
-  });
+  bool obscureText;
+  TextFormBuilder(
+      {this.hintText,
+      this.validator,
+      this.onSaved,
+      this.controller,
+      this.suffixWidget,
+      this.textStyle,
+      this.keybordType,
+      this.obscureText});
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +28,7 @@ class TextFormBuilder extends StatelessWidget {
       child: Container(
         color: Colors.white,
         child: TextFormField(
+          obscureText: obscureText != null ? obscureText : false,
           controller: controller,
           maxLines: 1,
           keyboardType: keybordType,
@@ -34,15 +38,14 @@ class TextFormBuilder extends StatelessWidget {
           onChanged: (v) {},
           style: TextStyle(
             fontFamily: AppTheme.fontFamily,
+            color: Colors.black,
           ),
           decoration: InputDecoration(
             contentPadding: EdgeInsets.all(20.0),
             fillColor: Colors.white,
             hintText: hintText,
-            hintStyle: TextStyle(
-              fontFamily: AppTheme.fontFamily,
-            ),
-            prefixIcon: icon,
+            hintStyle: textStyle != null ? textStyle : TextStyle(),
+            suffixIcon: suffixWidget != null ? suffixWidget : null,
             border: InputBorder.none,
           ),
         ),

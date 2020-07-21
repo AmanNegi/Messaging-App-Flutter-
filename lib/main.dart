@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,13 +8,13 @@ import './consts/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = true;
   await sharedPrefs.initSharedPrefs();
-  AppTheme.fontFamily = sharedPrefs.getValueFromSharedPrefs('fontFamily');
   runApp(
     DynamicTheme(
       defaultBrightness: _getDarkMode(),
       data: (brightness) {
-        AppTheme.changeFont(_getFontsFamily());
+        AppTheme.changeFont(getFontsFamily());
         AppTheme.changeColor(getMainColor());
         if (brightness == Brightness.dark) {
           AppTheme.toDarkMode();
@@ -28,6 +26,7 @@ void main() async {
       },
       themedWidgetBuilder: (context, data) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           theme: data,
           home: MyApp(),
         );
@@ -36,18 +35,21 @@ void main() async {
   );
 }
 
-_getFontsFamily() {
+String getFontsFamily() {
   if (sharedPrefs.checkIfExistsInSharedPrefs('fontFamily')) {
-    return (sharedPrefs.getValueFromSharedPrefs('fontFamily'));
+    print("got value from sharedPrefs : " +
+        sharedPrefs.getValueFromSharedPrefs('fontFamily'));
+
+    return sharedPrefs.getValueFromSharedPrefs('fontFamily');
   }
-  return GoogleFonts.aBeeZee().fontFamily;
+  return GoogleFonts.ubuntu().fontFamily;
 }
 
 getMainColor() {
   if (sharedPrefs.checkIfExistsInSharedPrefs('mainColor')) {
     return getColorFromInt(sharedPrefs.getIntFromSharedPrefs('mainColor'));
   }
-  return Colors.blue;
+  return Colors.deepOrange;
 }
 
 _getDarkMode() {
@@ -62,9 +64,13 @@ _getDarkMode() {
 
 class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
-    if (sharedPrefs.checkIfExistsInSharedPrefs("uid")) {
-      return MainPage();
+    if (!sharedPrefs.checkIfExistsInSharedPrefs("isLoggedIn"))
+      return SignUpPage();
+    else {
+      if (sharedPrefs.getBoolFromSharedPrefs('isLoggedIn'))
+        return MainPage();
+      else
+        return SignUpPage();
     }
-    return SignUpPage();
   }
 }

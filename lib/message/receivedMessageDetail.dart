@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_clipboard_manager/flutter_clipboard_manager.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:messaging_app_new/message/messageRepo.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../message/message.dart';
 import '../consts/theme.dart';
 
 class ReceivedMessageDetail extends StatelessWidget {
-  Message message;
-  var documentId;
-  var width, height;
+  final Message message;
+  final String documentId;
 
   ReceivedMessageDetail({this.message, @required this.documentId});
   @override
   Widget build(BuildContext context) {
-    width = MediaQuery.of(context).size.width;
-    height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
+    var height = MediaQuery.of(context).size.height;
     return Scaffold(
       floatingActionButton: message.type == 0
           ? FloatingActionButton.extended(
@@ -54,85 +51,92 @@ class ReceivedMessageDetail extends StatelessWidget {
       ),
       body: Column(
         children: <Widget>[
-          _buildMainWidget(context),
+          _buildMainWidget(context, width),
           Container(),
         ],
       ),
     );
   }
 
-  _buildMainWidget(context) {
+  _buildMainWidget(context, width) {
     if (message.type == 0) {
-      return _buildMessageWidget(context);
+      return _buildMessageWidget(context, width);
     } else {
-      return _buildImageWidget(context);
+      return _buildImageWidget(context, width);
     }
   }
 
-  _buildImageWidget(context) {
+  _buildImageWidget(context, width) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(right: 10.0, top: 10.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20.0),
-            topLeft: Radius.circular(20.0),
-            topRight: Radius.circular(20.0),
-          ),
-          child: Stack(
-            children: <Widget>[
-              AnimatedContainer(
-                duration: Duration(milliseconds: 500),
-                constraints: BoxConstraints(maxWidth: width * 0.7),
-                padding: EdgeInsets.only(
-                  top: 15.0,
-                  left: 15.0,
-                  right: 10.0,
-                  bottom: 5.0,
+      child: Stack(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 500),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20.0),
+                  topLeft: Radius.circular(20.0),
+                  topRight: Radius.circular(20.0),
                 ),
                 color: Theme.of(context).cardColor,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    ClipRRect(
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(20.0),
-                        topLeft: Radius.circular(20.0),
-                        topRight: Radius.circular(20.0),
-                      ),
-                      child: Image.network(
-                        message.imageUrl,
-                        height: 250,
-                        width: 300,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 5.0,
-                    ),
-                    Text(_getFormattedDate(message.date, 'jms'),
-                        style: TextStyle(
-                            color: AppTheme.receivedTimeColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900)),
-                  ],
-                ),
+                boxShadow: [
+                  BoxShadow(
+                      blurRadius: 5.0,
+                      color: Colors.black38.withOpacity(0.05),
+                      offset: Offset(0.0, 3.0),
+                      spreadRadius: 5.0),
+                ],
               ),
-              Positioned.fill(
-                  child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onDoubleTap: () {},
-                ),
-              )),
-            ],
+              constraints: BoxConstraints(maxWidth: width * 0.7),
+              padding: EdgeInsets.only(
+                top: 8.0,
+                left: 8.0,
+                right: 8.0,
+                bottom: 5.0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(20.0),
+                      topLeft: Radius.circular(20.0),
+                      topRight: Radius.circular(20.0),
+                    ),
+                    child: Image.network(
+                      message.imageUrl,
+                      height: 250,
+                      width: 300,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 5.0,
+                  ),
+                  Text(_getFormattedDate(message.date, 'jms'),
+                      style: TextStyle(
+                          color: AppTheme.receivedTimeColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900)),
+                ],
+              ),
+            ),
           ),
-        ),
+          Positioned.fill(
+              child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onDoubleTap: () {},
+            ),
+          )),
+        ],
       ),
     );
   }
 
-  _buildMessageWidget(context) {
+  _buildMessageWidget(context, width) {
     return Container(
       child: Padding(
         padding: const EdgeInsets.only(left: 5.0, top: 5.0),
@@ -145,10 +149,10 @@ class ReceivedMessageDetail extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(boxShadow: [
               BoxShadow(
-                  blurRadius: 5.0,
-                  color: AppTheme.notSeen.withOpacity(0.1),
-                  offset: Offset(0.0, 5.0),
-                  spreadRadius: 2.0)
+                  blurRadius: 2.0,
+                  color: AppTheme.notSeen.withOpacity(0.05),
+                  offset: Offset(0.0, 2.0),
+                  spreadRadius: 1.0)
             ]),
             child: Padding(
               padding: const EdgeInsets.all(5.0),

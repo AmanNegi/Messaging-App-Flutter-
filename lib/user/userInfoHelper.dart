@@ -1,13 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_clipboard_manager/flutter_clipboard_manager.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:mdi/mdi.dart';
 import 'package:messaging_app_new/Layout/infoDialog.dart';
 import 'package:messaging_app_new/user/user.dart';
+import 'package:shimmer/shimmer.dart';
 import '../consts/theme.dart';
 
 class UserInfoHelper extends StatefulWidget {
   final DocumentSnapshot snapshot;
+
   UserInfoHelper({this.snapshot});
   @override
   _UserInfoHelperState createState() => _UserInfoHelperState();
@@ -119,9 +122,24 @@ class _UserInfoHelperState extends State<UserInfoHelper> {
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                backgroundImage: NetworkImage(user.imageUrl),
-                radius: 35,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(120.0),
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  color: AppTheme.mainColor,
+                  child: CachedNetworkImage(
+                      imageUrl: user.imageUrl,
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) =>
+                          Icon(Mdi.alert, color: AppTheme.iconColor),
+                      placeholder: (context, url) => Shimmer.fromColors(
+                          child: Container(
+                            color: Colors.red,
+                          ),
+                          baseColor: AppTheme.shimmerBaseColor,
+                          highlightColor: AppTheme.shimmerEndingColor)),
+                ),
               ),
             ),
             Padding(
@@ -142,17 +160,35 @@ class _UserInfoHelperState extends State<UserInfoHelper> {
         Align(
           alignment: Alignment.topCenter,
           child: Container(
-            color: AppTheme.mainColor.withOpacity(0.3),
-            height: 0.22 * height,
+            color: Theme.of(context).cardColor,
+            height: 0.20 * height,
           ),
         ),
         Align(
           alignment: Alignment.topCenter,
           child: Padding(
             padding: const EdgeInsets.all(30.0),
-            child: CircleAvatar(
-              radius: 100.0,
-              backgroundImage: NetworkImage(user.imageUrl),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(120.0),
+              child: Hero(
+                tag: 'userImage',
+                child: Container(
+                  height: 175,
+                  width: 175,
+                  color: AppTheme.mainColor,
+                  child: CachedNetworkImage(
+                      imageUrl: user.imageUrl,
+                      fit: BoxFit.cover,
+                      errorWidget: (context, url, error) =>
+                          Icon(Mdi.alert, color: AppTheme.iconColor),
+                      placeholder: (context, url) => Shimmer.fromColors(
+                          child: Container(
+                            color: Colors.red,
+                          ),
+                          baseColor: AppTheme.shimmerBaseColor,
+                          highlightColor: AppTheme.shimmerEndingColor)),
+                ),
+              ),
             ),
           ),
         ),

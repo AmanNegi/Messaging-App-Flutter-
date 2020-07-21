@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -80,24 +81,24 @@ class BuildMessageWidget extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(boxShadow: [
                   BoxShadow(
-                      blurRadius: 6.0,
+                      blurRadius: 2.0,
                       color: message.isSeen
-                          ? AppTheme.isSeen.withOpacity(0.3)
-                          : AppTheme.notSeen.withOpacity(0.1),
-                      offset: Offset(0.0, 5.0),
+                          ? AppTheme.isSeen.withOpacity(0.05)
+                          : AppTheme.notSeen.withOpacity(0.05),
+                      offset: Offset(0.0, 2.0),
                       spreadRadius: 1.0)
                 ]),
-                child: Stack(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20.0),
-                          topLeft: Radius.circular(20.0),
-                          topRight: Radius.circular(20.0),
-                        ),
-                        child: AnimatedContainer(
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(20.0),
+                      topLeft: Radius.circular(20.0),
+                      topRight: Radius.circular(20.0),
+                    ),
+                    child: Stack(
+                      children: <Widget>[
+                        AnimatedContainer(
                           duration: Duration(milliseconds: 500),
                           constraints: BoxConstraints(maxWidth: width * 0.7),
                           padding: EdgeInsets.only(
@@ -122,12 +123,36 @@ class BuildMessageWidget extends StatelessWidget {
                                 ),
                                 child: Hero(
                                   tag: message.imageUrl,
-                                  child: FadeInImage.assetNetwork(
+                                  child:
+                                      /* FadeInImage.assetNetwork(
                                     placeholder: 'assets/loading.png',
                                     image: message.imageUrl,
                                     height: 250,
                                     width: 300,
                                     fit: BoxFit.cover,
+                                  ), */
+                                      CachedNetworkImage(
+                                    height: 250,
+                                    width: 300,
+                                    fit: BoxFit.cover,
+                                    errorWidget: (context, url, error) {
+                                      return Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Icon(Icons.error),
+                                          Text(error.toString()),
+                                        ],
+                                      );
+                                    },
+                                    imageUrl: message.imageUrl,
+                                    placeholder: (_, url) =>
+                                        CircularProgressIndicator(
+                                      valueColor:
+                                          AlwaysStoppedAnimation(Colors.white),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -144,27 +169,27 @@ class BuildMessageWidget extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ),
+                        Positioned.fill(
+                            child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) =>
+                                      ImageFullScreen(message.imageUrl)));
+                            },
+                            onDoubleTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => MessageDetail(
+                                        message: message,
+                                        documentId: documentId,
+                                      )));
+                            },
+                          ),
+                        )),
+                      ],
                     ),
-                    Positioned.fill(
-                        child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) =>
-                                  ImageFullScreen(message.imageUrl)));
-                        },
-                        onDoubleTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => MessageDetail(
-                                    message: message,
-                                    documentId: documentId,
-                                  )));
-                        },
-                      ),
-                    )),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -200,75 +225,99 @@ class BuildMessageWidget extends StatelessWidget {
                         ),
                         color: AppTheme.notSeen.withOpacity(0.4),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).canvasColor,
-                            borderRadius: BorderRadius.only(
-                              bottomRight: Radius.circular(20.0),
-                              topLeft: Radius.circular(20.0),
-                              topRight: Radius.circular(20.0),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              top: 15.0,
-                              left: 10.0,
-                              right: 15.0,
-                              bottom: 5.0,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                ClipRRect(
-                                  borderRadius: BorderRadius.only(
-                                    bottomRight: Radius.circular(20.0),
-                                    topLeft: Radius.circular(20.0),
-                                    topRight: Radius.circular(20.0),
-                                  ),
-                                  child: Hero(
-                                    tag: message.imageUrl,
-                                    child: FadeInImage.assetNetwork(
-                                      placeholder: 'assets/loading.png',
-                                      image: message.imageUrl,
-                                      height: 250,
-                                      width: 300,
-                                      fit: BoxFit.cover,
+                      child: Stack(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).canvasColor,
+                                borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(20.0),
+                                  topLeft: Radius.circular(20.0),
+                                  topRight: Radius.circular(20.0),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  top: 15.0,
+                                  left: 10.0,
+                                  right: 15.0,
+                                  bottom: 5.0,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        bottomRight: Radius.circular(20.0),
+                                        topLeft: Radius.circular(20.0),
+                                        topRight: Radius.circular(20.0),
+                                      ),
+                                      child: Hero(
+                                        tag: message.imageUrl,
+                                        child: CachedNetworkImage(
+                                          height: 250,
+                                          width: 300,
+                                          fit: BoxFit.cover,
+                                          errorWidget: (context, url, error) {
+                                            return Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: <Widget>[
+                                                Icon(Icons.error),
+                                                Text(error.toString()),
+                                              ],
+                                            );
+                                          },
+                                          imageUrl: message.imageUrl,
+                                          placeholder: (_, url) =>
+                                              CircularProgressIndicator(
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    SizedBox(
+                                      height: 5.0,
+                                    ),
+                                    Text(date,
+                                        style: TextStyle(
+                                            color: AppTheme.receivedTimeColor,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w900))
+                                  ],
                                 ),
-                                SizedBox(
-                                  height: 5.0,
-                                ),
-                                Text(date,
-                                    style: TextStyle(
-                                        color: AppTheme.receivedTimeColor,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w900))
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) =>
-                                  ImageFullScreen(message.imageUrl)));
-                        },
-                        onDoubleTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => ReceivedMessageDetail(
-                                    documentId: documentId,
-                                    message: message,
-                                  )));
-                        },
+                          Positioned.fill(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(20.0),
+                                  topLeft: Radius.circular(20.0),
+                                  topRight: Radius.circular(20.0),
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) =>
+                                          ImageFullScreen(message.imageUrl)));
+                                },
+                                onDoubleTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) =>
+                                          ReceivedMessageDetail(
+                                            documentId: documentId,
+                                            message: message,
+                                          )));
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -317,12 +366,12 @@ class BuildMessageWidget extends StatelessWidget {
                             : Theme.of(context).cardColor,
                         boxShadow: [
                           BoxShadow(
-                              blurRadius: 3.0,
+                              blurRadius: 2.0,
                               color: message.isSeen
-                                  ? AppTheme.isSeen.withOpacity(0.3)
-                                  : AppTheme.shadowColor.withOpacity(0.1),
-                              offset: Offset(0.0, 2.0),
-                              spreadRadius: 2.0)
+                                  ? AppTheme.isSeen.withOpacity(0.1)
+                                  : AppTheme.notSeen.withOpacity(0.1),
+                              offset: Offset(0.0, 3.0),
+                              spreadRadius: 1.0)
                         ]),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -349,7 +398,6 @@ class BuildMessageWidget extends StatelessWidget {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        splashColor: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(20.0),
                           topLeft: Radius.circular(20.0),
@@ -387,30 +435,23 @@ class BuildMessageWidget extends StatelessWidget {
                 topLeft: Radius.circular(20.0),
                 topRight: Radius.circular(20.0),
               ),
-              child: Stack(
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: Container(
-                      constraints: BoxConstraints(maxWidth: width * 0.7),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(20.0),
-                          topLeft: Radius.circular(20.0),
-                          topRight: Radius.circular(20.0),
-                        ),
-                        color: AppTheme.notSeen.withOpacity(0.5),
-                        /*  boxShadow: [
-                            BoxShadow(
-                                blurRadius: 3.0,
-                                color: AppTheme.notSeen.withOpacity(0.4),
-                                offset: Offset(0.0, 2.0),
-                                spreadRadius: 2.0)
-                          ] */
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: Container(
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Container(
+                  constraints: BoxConstraints(maxWidth: width * 0.7),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(20.0),
+                      topLeft: Radius.circular(20.0),
+                      topRight: Radius.circular(20.0),
+                    ),
+                    color: AppTheme.notSeen.withOpacity(0.5),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(1.0),
+                    child: Stack(
+                      children: <Widget>[
+                        Container(
                           decoration: BoxDecoration(
                             color: Theme.of(context).canvasColor,
                             borderRadius: BorderRadius.only(
@@ -441,24 +482,29 @@ class BuildMessageWidget extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ),
+                        Positioned.fill(
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.only(
+                                bottomRight: Radius.circular(20.0),
+                                topLeft: Radius.circular(20.0),
+                                topRight: Radius.circular(20.0),
+                              ),
+                              onDoubleTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => ReceivedMessageDetail(
+                                          message: message,
+                                          documentId: documentId,
+                                        )));
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Positioned.fill(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onDoubleTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => ReceivedMessageDetail(
-                                    message: message,
-                                    documentId: documentId,
-                                  )));
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

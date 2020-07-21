@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:messaging_app_new/data/strings.dart';
 
 class AppTheme {
   static Color textColor = Colors.black;
@@ -28,12 +29,15 @@ class AppTheme {
   static Color seenTextColor = Colors.white;
   static Color notSeenTextColor = Colors.black;
 
-  static Color receivedTimeColor = Colors.black;
+  static Color receivedTimeColor = Colors.grey;
   static Color secondaryTextColor = Colors.white;
 
   static Color buttonTextColor = Colors.white;
   static Color canvasColor = Colors.white;
-  static String fontFamily = GoogleFonts.aBeeZee().fontFamily;
+  static String fontFamily = GoogleFonts.ubuntu().fontFamily;
+
+  static Color shimmerBaseColor = Colors.grey[300];
+  static Color shimmerEndingColor = Colors.grey[100];
 
   static changeColor(Color color) {
     accentColor = color;
@@ -53,6 +57,8 @@ class AppTheme {
     receivedTimeColor = Colors.white;
     notSeenTimeColor = Colors.white;
 
+    shimmerBaseColor = Colors.grey[900];
+    shimmerEndingColor = Colors.grey[700];
     notSeenTextColor = Colors.white;
   }
 
@@ -62,7 +68,9 @@ class AppTheme {
     canvasColor = Colors.white;
     iconColor = Colors.black;
     sendMessageTextColor = Colors.black;
-    receivedTimeColor = Colors.black;
+    receivedTimeColor = Colors.grey;
+    shimmerBaseColor = Colors.grey[300];
+    shimmerEndingColor = Colors.grey[100];
     receivedMessageTextColor = Colors.black;
 
     notSeenTimeColor = Colors.grey;
@@ -72,7 +80,6 @@ class AppTheme {
   static getThemeData() {
     return ThemeData(
         brightness: brightness,
-        //     canvasColor: canvasColor,
         primaryColor: mainColor,
         accentColor: accentColor,
         primarySwatch: primarySwatch,
@@ -80,7 +87,7 @@ class AppTheme {
   }
 
   static changeFont(String font) {
-    fontFamily = font;
+    fontFamily = getFontFromString(font);
   }
 }
 

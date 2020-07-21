@@ -1,5 +1,6 @@
-
 //auth related strings--
+
+import 'package:google_fonts/google_fonts.dart';
 
 String dialogVerificationBodyText =
     "An verification was sent to your email. Kindly verify to continue. If you have verified wait for a while while it syncs with your device.";
@@ -13,3 +14,17 @@ String signUpHelperText = "Already have an account? Log in";
 
 String demoImage =
     "https://image.freepik.com/free-vector/plexus-modern-design-connections-network-futuristic_1048-11932.jpg";
+
+ String getFontFromString(String text) {
+  if (text == 'Ubuntu_regular') {
+    return GoogleFonts.ubuntu().fontFamily;
+  } else if (text == 'Quicksand_regular') {
+    return GoogleFonts.quicksand().fontFamily;
+  } else if (text == 'Exo_regular') {
+    return GoogleFonts.exo().fontFamily;
+  } else if (text == 'Comfortaa_regular') {
+    return GoogleFonts.comfortaa().fontFamily;
+  } else if (text == 'Raleway_regular') {
+    return GoogleFonts.raleway().fontFamily;
+  }
+}

@@ -76,17 +76,12 @@ class MessageRepo {
     return snapshot.documents[0].documentID;
   }
 
-  Future<Message> getLastMessage(GroupModel model, var documentId) async {
-    var documents = await Firestore.instance
+  Stream getLastMessage(GroupModel model, var documentId) {
+    return Firestore.instance
         .collection('message')
         .document(documentId)
         .collection('messages')
-        .getDocuments();
-    if (documents.documents.length <= 0) {
-      return null;
-    }
-    return Message.fromSnapshot(
-        documents.documents[documents.documents.length - 1]);
+        .snapshots();
   }
 
   deleteMessage(Message message) async {

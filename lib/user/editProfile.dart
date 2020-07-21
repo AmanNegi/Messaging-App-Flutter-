@@ -1,12 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:messaging_app_new/user/UserRepo.dart';
 import 'package:messaging_app_new/user/editProfileBuilder.dart';
-import 'storage.dart';
-import '../data/strings.dart';
 import '../data/sharedPrefs.dart';
 import '../consts/theme.dart';
+import 'package:mdi/mdi.dart';
+import '../Layout/useOfDataDialog.dart';
 
 class EditProfile extends StatefulWidget {
   @override
@@ -16,6 +15,7 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   var height, width;
   String uid;
+  var scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -35,17 +35,45 @@ class _EditProfileState extends State<EditProfile> {
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
     return Scaffold(
+        key: scaffoldKey,
         appBar: AppBar(
           elevation: 0,
-          backgroundColor:AppTheme. mainColor,
+          backgroundColor: Theme.of(context).cardColor,
+          title: Text(
+            "Edit profile",
+            style: TextStyle(color: AppTheme.textColor),
+          ),
           centerTitle: true,
-          title: Text("Edit profile"),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(
+                Icons.info,
+                color: AppTheme.iconColor,
+              ),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  builder: (context) => UseOfDataDialog(),
+                );
+              },
+            )
+          ],
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: Icon(
+              Mdi.chevronLeft,
+              color: AppTheme.iconColor,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
         body: StreamBuilder(
           stream: UserRepo().getReferenceSnapshots(uid),
           builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
             if (snapshot.hasData) {
-              return EditProfileBuilder(snapshot: snapshot.data);
+              return EditProfileBuilder(
+                  snapshot: snapshot.data, scaffoldKey: scaffoldKey);
             } else if (snapshot.hasError ||
                 snapshot == null ||
                 snapshot.connectionState == ConnectionState.none) {

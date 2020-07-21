@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:messaging_app_new/user/UserRepo.dart';
@@ -5,23 +6,29 @@ import 'package:messaging_app_new/user/user.dart';
 import 'storage.dart';
 import '../consts/theme.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import '../appData.dart';
 
 class EditProfileBuilder extends StatefulWidget {
   final DocumentSnapshot snapshot;
-  EditProfileBuilder({this.snapshot});
+  final GlobalKey<ScaffoldState> scaffoldKey;
+  EditProfileBuilder({this.snapshot, this.scaffoldKey});
   @override
   _EditProfileBuilderState createState() => _EditProfileBuilderState();
 }
 
 class _EditProfileBuilderState extends State<EditProfileBuilder> {
   User user;
+
   var height, width;
   var userName, userEmail;
-  var userImageUrl;
+  String userImageUrl;
+
   var _formKey = GlobalKey<FormState>();
   var isImageLoading = false;
   var isLoading = false;
+
   UserRepo userRepo = UserRepo();
+
   @override
   void initState() {
     user = User.fromSnapshot(widget.snapshot);
@@ -34,22 +41,43 @@ class _EditProfileBuilderState extends State<EditProfileBuilder> {
       print(data);
       setState(() {
         userImageUrl = data;
-        userRepo.updateUser(User(
+        User userObj = User(
             email: user.email,
             imageUrl: userImageUrl,
             reference: user.reference,
             uid: user.uid,
-            userName: user.userName));
+            userName: user.userName);
+        userRepo.updateUser(userObj);
+        setUser(userObj);
       });
     });
-    
+
     storageService.editProfileIsLoading.listen((value) {
       print(
           '------------------- value of image is loading [$value] ------------------ ');
+      if (value) {
+        _showSnackBar(
+            "Updating the image may take a while according to the size of the image selected.");
+      } else {
+        _showSnackBar("Updated the image");
+      }
       setState(() {
         isImageLoading = value;
       });
     });
+  }
+
+  _showSnackBar(String text) {
+    widget.scaffoldKey.currentState.showSnackBar(
+      SnackBar(
+        backgroundColor: Theme.of(context).cardColor,
+        content: Text(
+          text,
+          style: TextStyle(
+              color: AppTheme.textColor, fontFamily: AppTheme.fontFamily),
+        ),
+      ),
+    );
   }
 
   @override
@@ -59,7 +87,7 @@ class _EditProfileBuilderState extends State<EditProfileBuilder> {
     return Stack(
       children: <Widget>[
         Opacity(
-          opacity: isLoading ? 0.6 : 1.0,
+          opacity: isLoading || isImageLoading ? 0.6 : 1.0,
           child: GestureDetector(
             onTap: () {
               FocusScope.of(context).requestFocus(FocusNode());
@@ -73,7 +101,7 @@ class _EditProfileBuilderState extends State<EditProfileBuilder> {
           ),
         ),
         Visibility(
-          visible: isLoading,
+          visible: isLoading || isImageLoading,
           child: Center(
             child: CircularProgressIndicator(),
           ),
@@ -106,8 +134,8 @@ class _EditProfileBuilderState extends State<EditProfileBuilder> {
                     padding: const EdgeInsets.only(left: 8.0),
                     child: TextFormField(
                         validator: (a) {
-                          if (a.length == 0) {
-                            return "Enter a valid name";
+                          if (a.length < 4) {
+                            return "Enter name with atleast 4 characters";
                           }
                           return null;
                         },
@@ -124,6 +152,9 @@ class _EditProfileBuilderState extends State<EditProfileBuilder> {
             ),
             Spacer(),
             _buildButton(),
+            SizedBox(
+              height: 0.05 * height,
+            ),
           ],
         ),
       ),
@@ -159,7 +190,9 @@ class _EditProfileBuilderState extends State<EditProfileBuilder> {
                   isLoading = true;
                 });
                 await userRepo.updateUser(newUser);
-                Fluttertoast.showToast(msg: "Updated Data sucessfully");
+
+                _showSnackBar("Updated data sucessfully");
+
                 setState(() {
                   isLoading = false;
                 });
@@ -173,13 +206,13 @@ class _EditProfileBuilderState extends State<EditProfileBuilder> {
 
   _buildTopWidget() {
     return Container(
-      // color: Colors.red,
       child: Stack(
         children: <Widget>[
           Align(
             alignment: Alignment.topCenter,
             child: Container(
-              color: AppTheme.mainColor.withOpacity(0.3),
+              // color: AppTheme.mainColor.withOpacity(0.3),
+              color: Theme.of(context).cardColor,
               height: 0.22 * height,
             ),
           ),
@@ -194,19 +227,28 @@ class _EditProfileBuilderState extends State<EditProfileBuilder> {
                   }
                 },
                 child: Container(
-                  constraints: BoxConstraints(maxHeight: 200, maxWidth: 200),
+                  constraints: BoxConstraints(
+                      maxHeight: 0.25 * height, maxWidth: 0.25 * height),
                   child: Stack(
                     children: <Widget>[
                       Center(
-                        child: CircleAvatar(
-                          radius: 100,
-                          backgroundImage: NetworkImage(userImageUrl),
-                          child: Visibility(
-                            visible: isImageLoading,
-                            child: CircularProgressIndicator(),
-                            maintainAnimation: true,
-                            maintainState: true,
-                          ),
+                        child: CachedNetworkImage(
+                          imageUrl: userImageUrl,
+                          imageBuilder: (context, imageProvider) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                //   color: Theme.of(context).cardColor,
+                                color: AppTheme.mainColor,
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                    image: imageProvider, fit: BoxFit.cover),
+                              ),
+                            );
+                          },
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
                         ),
                       ),
                       Positioned(

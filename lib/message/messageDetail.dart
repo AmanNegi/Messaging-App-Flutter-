@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:messaging_app_new/message/messageRepo.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -7,8 +6,8 @@ import '../message/message.dart';
 import '../consts/theme.dart';
 
 class MessageDetail extends StatelessWidget {
-  Message message;
-  var documentId;
+  final Message message;
+  final String documentId;
   var width, height;
 
   MessageDetail({this.message, @required this.documentId});
@@ -33,12 +32,13 @@ class MessageDetail extends StatelessWidget {
       body: Column(
         children: <Widget>[
           _buildMainWidget(context),
-          Divider(),
-          _buildColorContainer(AppTheme.isSeen.withOpacity(0.9), "Seen color",
+          SizedBox(
+            height: 10,
+          ),
+          _buildColorContainer(AppTheme.isSeen.withOpacity(0.8), "Seen color",
               AppTheme.buttonTextColor),
           _buildColorContainer(
               Theme.of(context).cardColor, "Unseen color", AppTheme.textColor),
-          Divider(),
           Spacer(),
           _showOrNotShowDeleteMessage(context),
         ],
@@ -59,12 +59,13 @@ class MessageDetail extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.only(bottom: 4.0),
         child: ButtonTheme(
-          minWidth: 0.9 * width,
+          minWidth: 0.75 * width,
           height: 0.075 * height,
-          child: FlatButton(
+          child: RaisedButton(
+            elevation: 0,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0)),
-            color: AppTheme.accentColor,
+                borderRadius: BorderRadius.circular(30.0)),
+            color: Colors.red,
             onPressed: () {
               if (message.type == 0) {
                 messageRepo.deleteMessage(message);
@@ -74,10 +75,20 @@ class MessageDetail extends StatelessWidget {
                 Navigator.of(context).pop();
               }
             },
-            child: Text(
-              "Delete message?",
-              style: TextStyle(
-                  color: AppTheme.buttonTextColor, fontWeight: FontWeight.w800),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(
+                  Icons.delete_forever,
+                  color: AppTheme.buttonTextColor,
+                ),
+                Text(
+                  "Delete message?",
+                  style: TextStyle(
+                      color: AppTheme.buttonTextColor,
+                      fontWeight: FontWeight.w800),
+                ),
+              ],
             ),
           ),
         ),
@@ -120,9 +131,9 @@ class MessageDetail extends StatelessWidget {
                 duration: Duration(milliseconds: 500),
                 constraints: BoxConstraints(maxWidth: width * 0.7),
                 padding: EdgeInsets.only(
-                  top: 15.0,
-                  left: 15.0,
-                  right: 10.0,
+                  top: 8.0,
+                  left: 8.0,
+                  right: 8.0,
                   bottom: 5.0,
                 ),
                 color: message.isSeen
@@ -149,7 +160,9 @@ class MessageDetail extends StatelessWidget {
                     ),
                     Text(_getFormattedDate(message.date, 'jms'),
                         style: TextStyle(
-                            color: AppTheme.receivedTimeColor,
+                            color: message.isSeen
+                                ? Colors.white
+                                : AppTheme.receivedTimeColor,
                             fontSize: 10,
                             fontWeight: FontWeight.w900)),
                   ],
@@ -215,7 +228,7 @@ class MessageDetail extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildTextWithLinks(message.message),
+                          buildTextWithLinks(message.message, message.isSeen),
                           SizedBox(
                             height: 5.0,
                           ),
@@ -242,9 +255,12 @@ class MessageDetail extends StatelessWidget {
   }
 }
 
-Text buildTextWithLinks(String textToLink) => Text.rich(TextSpan(
+Text buildTextWithLinks(String textToLink, bool isSeen) => Text.rich(TextSpan(
     children: linkify(textToLink),
-    style: TextStyle(fontSize: 16.0, fontFamily: AppTheme.fontFamily)));
+    style: TextStyle(
+        fontSize: 16.0,
+        fontFamily: AppTheme.fontFamily,
+        color: isSeen ? Colors.white : AppTheme.textColor)));
 
 Future<void> openUrl(String url) async {
   if (await canLaunch(url)) {
