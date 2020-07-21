@@ -26,8 +26,8 @@ Messaging App comes with 8 screen application pages. It comes with both light an
 <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/main_page.png" width="400"/>
 </p>
 <p float="left">
-  <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/screenshots/chat_window.png" width="100" /> 
-  <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/screenshots/chat_window2.png" width="100" />
+  <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/chat_window.png" width="100" /> 
+  <img src="https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/chat_window2.png" width="100" />
 </p>
  Working Video https://github.com/AmanNegi/Messaging-App-Flutter-/blob/master/Screenshots/walkthrough.mp4
 
